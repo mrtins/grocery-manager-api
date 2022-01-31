@@ -13,7 +13,7 @@ export class CategoriesService {
   }
 
   findAll() {
-    return this.prisma.category.findMany({});
+    return this.prisma.category.findMany();
   }
 
   findOne(id: number) {
@@ -24,11 +24,15 @@ export class CategoriesService {
     return this.prisma.category.findMany({ where: { userId } });
   }
 
-  update(id: number, updateCategoryDto: UpdateCategoryDto) {
-    return this.prisma.category.update({
-      where: { id },
-      data: updateCategoryDto,
-    });
+  async update(id: number, updateCategoryDto: UpdateCategoryDto) {
+    try {
+      return await this.prisma.category.update({
+        where: { id },
+        data: updateCategoryDto,
+      });
+    } catch (error) {
+      throw new NotFoundException();
+    }
   }
 
   async remove(id: number) {
