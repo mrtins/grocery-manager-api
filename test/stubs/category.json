@@ -1,0 +1,20 @@
+[
+  {
+    "id": 1,
+    "userId": 1,
+    "categoryName": "Talho",
+    "description": "Carnes em geral"
+  },
+  {
+    "id": 2,
+    "userId": 1,
+    "categoryName": "Mercearia",
+    "description": "Gerais em mercearia"
+  },
+  {
+    "id": 3,
+    "userId": 1,
+    "categoryName": "Teste",
+    "description": "Gerais"
+  }
+]
