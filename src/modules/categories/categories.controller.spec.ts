@@ -1,43 +1,82 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { PrismaService } from '../../prisma/prisma.service';
 import { CategoriesController } from './categories.controller';
 import { CategoriesService } from './categories.service';
+import categoryList from 'test/stubs/category.json';
 
 describe('CategoriesController', () => {
   let controller: CategoriesController;
   let service: CategoriesService;
-  let prisma: PrismaService;
+
+  const serviceMock = {
+    findAll: jest.fn().mockResolvedValue(categoryList),
+    create: jest.fn().mockReturnValue(categoryList[0]),
+    findOne: jest.fn().mockReturnValue(categoryList[0]),
+    findByUser: jest.fn().mockReturnValue(categoryList),
+    update: jest.fn().mockReturnValue(categoryList[0]),
+    remove: jest.fn(),
+  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [CategoriesController],
-      providers: [CategoriesService, PrismaService],
+      providers: [{ provide: CategoriesService, useValue: serviceMock }],
     }).compile();
 
     controller = module.get<CategoriesController>(CategoriesController);
     service = module.get<CategoriesService>(CategoriesService);
-    prisma = module.get<PrismaService>(PrismaService);
-  });
-
-  it('should be defined', () => {
-    expect(controller).toBeDefined();
   });
 
   describe('findAll', () => {
     it('should return an array of categories', async () => {
-      const result = [
-        {
-          id: 1,
-          userId: 1,
-          categoryName: 'Talho',
-          description: 'Carnes em geral',
-        },
-      ];
+      const response = await controller.findAll();
 
-      prisma.category.findMany = jest.fn().mockReturnValueOnce(result);
+      expect(service.findAll).toBeCalledTimes(1);
+      expect(response).toEqual(categoryList);
+    });
+  });
 
-      expect(await controller.findAll()).toBe(result);
-      expect(prisma.category.findMany).toHaveBeenCalledTimes(1);
+  describe('create', () => {
+    it('should create a category and return', async () => {
+      const response = await controller.create(categoryList[0]);
+
+      expect(service.create).toBeCalledWith(categoryList[0]);
+      expect(response).toEqual(categoryList[0]);
+    });
+  });
+
+  describe('findOne', () => {
+    it('should return one category', async () => {
+      const response = await controller.findOne('1');
+
+      expect(service.findOne).toBeCalledWith(1);
+      expect(response).toEqual(categoryList[0]);
+    });
+  });
+
+  describe('findByUser', () => {
+    it('should return categories associated with user id', async () => {
+      const response = await controller.findByUser('1');
+
+      expect(service.findByUser).toBeCalledWith(1);
+      expect(response).toEqual(categoryList);
+    });
+  });
+
+  describe('update', () => {
+    it('should update a category', async () => {
+      const response = await controller.update('1', categoryList[0]);
+
+      expect(service.update).toBeCalledWith(1, categoryList[0]);
+      expect(response).toEqual(categoryList[0]);
+    });
+  });
+
+  describe('remove', () => {
+    it('should remove a category', async () => {
+      const response = await controller.remove('1');
+
+      expect(service.remove).toBeCalledWith(1);
+      expect(response).toBeUndefined();
     });
   });
 });
