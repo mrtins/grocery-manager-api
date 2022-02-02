@@ -4,21 +4,13 @@ import { Test, TestingModule } from '@nestjs/testing';
 import categoryStub from 'test/stubs/category.json';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CategoriesService } from './categories.service';
+import { buildPrismaCrud } from 'test/mocks/mock-helper';
 
 const categoriesList = categoryStub;
 
 const oneCategory = categoriesList[0];
 
-const db = {
-  category: {
-    findMany: jest.fn().mockResolvedValue(categoriesList),
-    findUnique: jest.fn().mockResolvedValue(oneCategory),
-    create: jest.fn().mockReturnValue(oneCategory),
-    save: jest.fn(),
-    update: jest.fn().mockResolvedValue(oneCategory),
-    delete: jest.fn(),
-  },
-};
+const prismaMock = buildPrismaCrud('category', categoriesList);
 
 describe('CategoriesService', () => {
   let service: CategoriesService;
@@ -26,7 +18,10 @@ describe('CategoriesService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [CategoriesService, { provide: PrismaService, useValue: db }],
+      providers: [
+        CategoriesService,
+        { provide: PrismaService, useValue: prismaMock },
+      ],
     }).compile();
 
     service = module.get<CategoriesService>(CategoriesService);
@@ -58,7 +53,7 @@ describe('CategoriesService', () => {
       });
     });
 
-    it('should return nothing when category not is found', async () => {
+    it('should return nothing when category is found', async () => {
       jest.spyOn(prisma.category, 'findUnique').mockResolvedValue(undefined);
 
       const returnedCategory = await service.findOne(99);

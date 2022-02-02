@@ -2,19 +2,13 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { CategoriesController } from './categories.controller';
 import { CategoriesService } from './categories.service';
 import categoryList from 'test/stubs/category.json';
+import { buildServiceCrud } from 'test/mocks/mock-helper';
+
+const serviceMock = buildServiceCrud(categoryList);
 
 describe('CategoriesController', () => {
   let controller: CategoriesController;
   let service: CategoriesService;
-
-  const serviceMock = {
-    findAll: jest.fn().mockResolvedValue(categoryList),
-    create: jest.fn().mockReturnValue(categoryList[0]),
-    findOne: jest.fn().mockReturnValue(categoryList[0]),
-    findByUser: jest.fn().mockReturnValue(categoryList),
-    update: jest.fn().mockReturnValue(categoryList[0]),
-    remove: jest.fn(),
-  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
