@@ -2,8 +2,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { buildPrismaCrud } from 'test/mocks/mock-helper';
 import { UserService } from './user.service';
-import userStub from 'test/stubs/user';
 import { NotFoundException } from '@nestjs/common';
+import userStub from 'test/stubs/user.stub';
 
 const model = 'user';
 const db = buildPrismaCrud(model, userStub);

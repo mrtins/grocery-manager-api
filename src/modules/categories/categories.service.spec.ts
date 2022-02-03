@@ -1,16 +1,13 @@
 import faker from '@faker-js/faker';
 import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import categoryStub from 'test/stubs/category.json';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { CategoriesService } from './categories.service';
 import { buildPrismaCrud } from 'test/mocks/mock-helper';
+import categoryStub from 'test/stubs/category.json';
+import { CategoriesService } from './categories.service';
 
-const categoriesList = categoryStub;
-
-const oneCategory = categoriesList[0];
-
-const prismaMock = buildPrismaCrud('category', categoriesList);
+const model = 'category';
+const prismaMock = buildPrismaCrud(model, categoryStub);
 
 describe('CategoriesService', () => {
   let service: CategoriesService;
@@ -33,41 +30,41 @@ describe('CategoriesService', () => {
   });
 
   describe('findAll', () => {
-    it('should return an array of categories', async () => {
-      const categories = await service.findAll();
+    it(`should return an array of ${model}`, async () => {
+      const response = await service.findAll();
 
-      expect(categories).toEqual(categoriesList);
-      expect(prisma.category.findMany).toHaveBeenCalledTimes(1);
-      expect(prisma.category.findMany).toHaveBeenCalledWith(/* nothing */);
+      expect(response).toEqual(categoryStub);
+      expect(prisma[model].findMany).toHaveBeenCalledTimes(1);
+      expect(prisma[model].findMany).toHaveBeenCalledWith(/* nothing */);
     });
   });
 
   describe('findOne', () => {
-    it('should return a single category', async () => {
-      const returnedCategory = await service.findOne(1);
+    it(`should return a single ${model}`, async () => {
+      const response = await service.findOne(1);
 
-      expect(returnedCategory).toEqual(oneCategory);
-      expect(prisma.category.findUnique).toHaveBeenCalledTimes(1);
-      expect(prisma.category.findUnique).toHaveBeenCalledWith({
+      expect(response).toEqual(categoryStub[0]);
+      expect(prisma[model].findUnique).toHaveBeenCalledTimes(1);
+      expect(prisma[model].findUnique).toHaveBeenCalledWith({
         where: { id: 1 },
       });
     });
 
-    it('should return nothing when category is found', async () => {
-      jest.spyOn(prisma.category, 'findUnique').mockResolvedValue(undefined);
+    it(`should return nothing when ${model} is not found`, async () => {
+      jest.spyOn(prisma[model], 'findUnique').mockResolvedValue(undefined);
 
-      const returnedCategory = await service.findOne(99);
+      const response = await service.findOne(99);
 
-      expect(returnedCategory).toBeUndefined();
-      expect(prisma.category.findUnique).toHaveBeenCalledTimes(1);
-      expect(prisma.category.findUnique).toHaveBeenCalledWith({
+      expect(response).toBeUndefined();
+      expect(prisma[model].findUnique).toHaveBeenCalledTimes(1);
+      expect(prisma[model].findUnique).toHaveBeenCalledWith({
         where: { id: 99 },
       });
     });
   });
 
   describe('findByUser', () => {
-    it('should return categories from user id', async () => {
+    it(`should return ${model} array from user id`, async () => {
       const userCategoriesData = [
         {
           id: 1,
@@ -86,56 +83,56 @@ describe('CategoriesService', () => {
       const userId = 2;
 
       jest
-        .spyOn(prisma.category, 'findMany')
+        .spyOn(prisma[model], 'findMany')
         .mockResolvedValue(userCategoriesData);
 
-      const userCategories = await service.findByUser(userId);
+      const response = await service.findByUser(userId);
 
-      expect(userCategories).toEqual(userCategoriesData);
-      expect(prisma.category.findMany).toHaveBeenCalledWith({
+      expect(response).toEqual(userCategoriesData);
+      expect(prisma[model].findMany).toHaveBeenCalledWith({
         where: { userId: userId },
       });
     });
 
-    it('should return empty array if no categories found', async () => {
+    it(`should return empty array if no ${model} found`, async () => {
       const userId = 2;
 
-      jest.spyOn(prisma.category, 'findMany').mockResolvedValue([]);
+      jest.spyOn(prisma[model], 'findMany').mockResolvedValue([]);
 
-      const userCategories = await service.findByUser(userId);
+      const response = await service.findByUser(userId);
 
-      expect(userCategories).toEqual([]);
-      expect(prisma.category.findMany).toHaveBeenCalledWith({
+      expect(response).toEqual([]);
+      expect(prisma[model].findMany).toHaveBeenCalledWith({
         where: { userId: userId },
       });
     });
   });
 
   describe('create', () => {
-    it('should create a new category', async () => {
-      const newCategory = await service.create(oneCategory);
+    it(`should create a new ${model}`, async () => {
+      const response = await service.create(categoryStub[0]);
 
-      expect(newCategory).toBe(oneCategory);
-      expect(prisma.category.create).toHaveBeenCalledTimes(1);
-      expect(prisma.category.create).toHaveBeenCalledWith({
-        data: oneCategory,
+      expect(response).toBe(categoryStub[0]);
+      expect(prisma[model].create).toHaveBeenCalledTimes(1);
+      expect(prisma[model].create).toHaveBeenCalledWith({
+        data: categoryStub[0],
       });
     });
   });
 
   describe('updateOne', () => {
-    it('should update a category', async () => {
-      const updatedCategory = await service.update(1, oneCategory);
+    it(`should update a ${model}`, async () => {
+      const response = await service.update(1, categoryStub[0]);
 
-      expect(updatedCategory).toEqual(oneCategory);
-      expect(prisma.category.update).toHaveBeenCalledTimes(1);
-      expect(prisma.category.update).toHaveBeenCalledWith({
+      expect(response).toEqual(categoryStub[0]);
+      expect(prisma[model].update).toHaveBeenCalledTimes(1);
+      expect(prisma[model].update).toHaveBeenCalledWith({
         where: { id: 1 },
-        data: oneCategory,
+        data: categoryStub[0],
       });
     });
 
-    it('should return NotFoundException when no category is found', async () => {
+    it(`should return NotFoundException when no ${model} is found`, async () => {
       const unexistingCategory = {
         id: 99,
         userId: 99,
@@ -143,7 +140,7 @@ describe('CategoriesService', () => {
         description: faker.lorem.words(5),
       };
 
-      jest.spyOn(prisma.category, 'update').mockRejectedValue(new Error());
+      jest.spyOn(prisma[model], 'update').mockRejectedValue(new Error());
 
       try {
         await service.update(99, unexistingCategory);
@@ -151,7 +148,7 @@ describe('CategoriesService', () => {
         expect(error).toEqual(new NotFoundException());
       }
 
-      expect(prisma.category.update).toHaveBeenCalledWith({
+      expect(prisma[model].update).toHaveBeenCalledWith({
         where: { id: 99 },
         data: unexistingCategory,
       });
@@ -159,14 +156,14 @@ describe('CategoriesService', () => {
   });
 
   describe('deleteOne', () => {
-    it('should return empty body if item found', async () => {
+    it(`should delete ${model} and return empty body`, async () => {
       expect(await service.remove(1)).toBeUndefined();
-      expect(prisma.category.delete).toHaveBeenCalledTimes(1);
-      expect(prisma.category.delete).toHaveBeenCalledWith({ where: { id: 1 } });
+      expect(prisma[model].delete).toHaveBeenCalledTimes(1);
+      expect(prisma[model].delete).toHaveBeenCalledWith({ where: { id: 1 } });
     });
 
-    it('should return NotFoundException if item does not exist', async () => {
-      jest.spyOn(prisma.category, 'delete').mockRejectedValue(new Error());
+    it(`should return NotFoundException if ${model} does not exist`, async () => {
+      jest.spyOn(prisma[model], 'delete').mockRejectedValue(new Error());
 
       try {
         await service.remove(99);
@@ -174,8 +171,8 @@ describe('CategoriesService', () => {
         expect(error).toEqual(new NotFoundException());
       }
 
-      expect(prisma.category.delete).toHaveBeenCalledTimes(1);
-      expect(prisma.category.delete).toHaveBeenCalledWith({
+      expect(prisma[model].delete).toHaveBeenCalledTimes(1);
+      expect(prisma[model].delete).toHaveBeenCalledWith({
         where: { id: 99 },
       });
     });
